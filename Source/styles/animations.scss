@@ -1,0 +1,77 @@
+.filter-news-enter {
+  max-height: 0px;
+}
+
+.filter-news-enter.filter-news-enter-active {
+  max-height: 200px;
+  transition: max-height 500ms ease-in;
+}
+
+.filter-news-leave {
+  max-height: 200px;
+}
+
+.filter-news-leave.filter-news-leave-active {
+  max-height: 0;
+  transition: max-height 300ms ease-in;
+}
+
+.filter-news-appear {
+  //opacity: 0.01;
+  max-height: 0px;
+}
+
+.filter-news-appear.filter-news-appear-active {
+  //opacity: 1;
+  max-height: 200px;
+  transition: max-height 1.25s ease-in;
+}
+
+//news-list---------------------------------------------------------------------
+.news-list-enter {
+  opacity: 0.01;
+}
+
+.news-list-enter.news-list-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.news-list-leave {
+  opacity: 1;
+}
+
+.news-list-leave.news-list-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
+}
+
+//datepicker--------------------------------------------------------------------
+.filter-datepicker-enter {
+  opacity: 0.01;
+}
+
+.filter-datepicker-enter.filter-datepicker-enter-active {
+  opacity: 1;
+  transition: opacity 200ms ease-in;
+}
+
+.filter-datepicker-leave {
+  opacity: 1;
+}
+
+.filter-datepicker-leave.filter-datepicker-leave-active {
+  opacity: 0.01;
+  transition: opacity 200ms ease-in;
+}
+
+.filter-datepicker-appear {
+  //opacity: 0.01;
+  opacity: 0.01;
+}
+
+.filter-datepicker-appear.filter-datepicker-appear-active {
+  //opacity: 1;
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
