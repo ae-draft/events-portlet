@@ -1,51 +1,51 @@
 import { EVENTS_PAGE_SIZE } from '../common/consts/constants';
 import { interaction } from '../common/server-interaction';
-import {periodFilterTypes} from '../common/consts/period-filter-types';
+import {VisibilityFilters} from './filters-actions';
+const {PERIOD_FILTER, USER_FILTER, TYPE_FILTER, DATEPICKER} = VisibilityFilters;
+import {getFilterValue, getDateRange} from '../modules/events/utils/filter-func'
 
 export const LOAD_EVENTS = 'LOAD_EVENTS';
-export const SET_VISIBILITY_FILTER = 'SET_VISIBILITY_FILTER';
-export const DEL_VISIBILITY_FILTER = 'DEL_VISIBILITY_FILTER';
-export const SET_DATEPICKER_FILTER = 'SET_DATEPICKER_FILTER';
+export const LOAD_NEXT = 'LOAD_NEXT';
 
-export const VisibilityFilters = {
-  PERIOD_FILTER: 'PERIOD_FILTER',
-  USER_FILTER: 'USER_FILTER',
-  TYPE_FILTER: 'TYPE_FILTER',
-  DATEPICKER: 'DATEPICKER'
-};
+function buildComplexFilter(filters) {
+   let dateRange = getDateRange(filters);
 
-export function fetchEvents(pageNumber, pageSize) {
-   return dispatch => {
-      interaction.send('/events', {pageNumber, pageSize}, {}, dispatch).done(req => {
-         dispatch({
-            type: LOAD_EVENTS,
-            recievedNews: req.Data,
-            total: req.Count
-         });
+   return {
+      AuthorId: getFilterValue(USER_FILTER, filters),
+      EventTypeId: getFilterValue(TYPE_FILTER, filters),
+      StartDate: dateRange.startDate,
+      EndDate: dateRange.endDate
+   };
+}
+
+function getRequestOptions(state) {
+   let storedEventsTotal = _.result(state, 'events._total');
+   let pageNumber = 1;
+   let filters = _.result(state, 'filters.filters');
+   let filter = buildComplexFilter(filters);
+
+   return {pageNumber, pageSize: EVENTS_PAGE_SIZE, filter};
+}
+
+export function fetchEvents(action, pageNumber = 1) {
+   return (dispatch, getState) => {
+      interaction.send('/events', {...getRequestOptions(getState()), pageNumber}, {}, dispatch).done(req => {
+         dispatch({type: action, recievedNews: req.Data, total: req.Count});
       });
    };
 }
 
 export function loadEvents() {
-   return (dispatch, getState) => {
-      let _state = getState();
-      let storedEvents = _.result(_state, 'events.data');
-      let storedEventsTotal = _.result(_state, 'events._total');
-      let pageNumber = (storedEvents.length / EVENTS_PAGE_SIZE) + 1;
-
-      if(_.isEmpty(storedEvents) || storedEvents.length < storedEventsTotal) {
-         return dispatch(fetchEvents(pageNumber, EVENTS_PAGE_SIZE));
-      }
-   };
+   return dispatch => dispatch(fetchEvents(LOAD_EVENTS));
 }
 
-export function setVisibilityFilter(filter, param) {
-   if(filter === VisibilityFilters.DATEPICKER)
-      return { type: SET_DATEPICKER_FILTER, filter, param };
-   else
-      return { type: SET_VISIBILITY_FILTER, filter, param };
+export function loadNext() {
+   return (dispatch, getState) => dispatch(fetchEvents(LOAD_NEXT, getPageNumber(getState())));
 }
 
-export function delVisibilityFilter(filter) {
-   return { type: DEL_VISIBILITY_FILTER, filter };
+export function getPageNumber(state) {
+   let storedEvents = _.result(state, 'events.data');
+   if(!storedEvents) return 1;
+
+   return storedEvents.length < EVENTS_PAGE_SIZE ? 1 : (storedEvents.length / EVENTS_PAGE_SIZE) + 1;
 }

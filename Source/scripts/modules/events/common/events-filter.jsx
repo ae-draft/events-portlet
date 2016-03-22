@@ -5,24 +5,24 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import UserFilter from '../common/user-filter.jsx';
 import PeriodFilter from '../common/period-filter.jsx';
 import TypeFilter from '../common/type-filter.jsx';
+import DateRangeFilter from '../common/daterange-filter.jsx';
 
 import {loadEventTypes} from '../../../actions/eventTypes-actions';
-import {setVisibilityFilter, delVisibilityFilter, VisibilityFilters} from '../../../actions/events-actions';
+import {VisibilityFilters, changeFilter} from '../../../actions/filters-actions';
 let {USER_FILTER, PERIOD_FILTER, TYPE_FILTER, DATEPICKER} = VisibilityFilters;
 
 import {periodFilterTypes} from '../../../common/consts/period-filter-types';
-let {SELECTED_DATE} = periodFilterTypes;
-
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import {getFilterValue} from '../utils/filter-func';
 
 let _connect = state => {
    let uniqUsedPropTypes = _.chain(state.events.data).map(item => _.get(item, 'Type')).uniq().value();
    let filteredEventTypes = uniqUsedPropTypes => filter => uniqUsedPropTypes.some(x => x == filter.Id);
 
    return {
-      filters: state.filters,
-      users: _.chain(state.events.data).map(item => _.get(item, 'User')).uniq('Id').value(),
+      filters: state.filters.filters,
+      hasActiveFilters: state.filters.hasActiveFilters,
+      showDateRangeFilter: state.filters.showDateRangeFilter,
+      users: _.chain(state.events.data).map(item => _.get(item, 'User')).uniqBy('Id').value(),
       eventTypes: state.eventTypes.filter(filteredEventTypes(uniqUsedPropTypes))
    }
 };
@@ -48,60 +48,41 @@ export default class Filter extends React.Component {
    }
 
    changeStartDate(date) {
-      this.dispatch(setVisibilityFilter(DATEPICKER, {startDate: date}));
+      this.dispatch(changeFilter(DATEPICKER, {startDate: date}));
    }
 
    changeEndDate(date) {
-      this.dispatch(setVisibilityFilter(DATEPICKER, {endDate: date}));
+      this.dispatch(changeFilter(DATEPICKER, {endDate: date}));
    }
 
    changeFilters(nextFilter, param) {
-      if(param === SELECTED_DATE)
-         this.dispatch(setVisibilityFilter(DATEPICKER, {}));
-      else
-         _.isEmpty(param)
-            ? this.dispatch(delVisibilityFilter(nextFilter))
-            : this.dispatch(setVisibilityFilter(nextFilter, param));
+      this.dispatch(changeFilter(nextFilter, param));
    }
 
    render() {
-      const {dispatch, eventTypes, users, filters} = this.props;
-      let showDatePicker = filters.some(x => x.filter === DATEPICKER);
-      let _filterValue = type => _.result(filters.find(x => x.filter === type), 'param');
+      const {dispatch, eventTypes, users, filters, hasActiveFilters, showDateRangeFilter} = this.props;
+      let _getDateRangeValue = getEndDate => {
+         let _value = getFilterValue(DATEPICKER, filters);
+         if(!_value) return null;
+
+         return getEndDate ? _value.endDate : _value.startDate;
+      };
 
       let filterDot = <div className="filtered-dot"></div>;
-      let dateRangeBlock = showDatePicker ? <div className="filter-option f-datepicker">
-         <div className="f-datepicker-inner">
-            <DatePicker
-               selected={_filterValue(DATEPICKER).startDate}
-               onChange={::this.changeStartDate}
-               placeholderText="Начальная дата"
-               isClearable={true}
-               startDate={_filterValue(DATEPICKER).startDate}
-               endDate={_filterValue(DATEPICKER).endDate}
-               showYearDropdown
-               dateFormatCalendar="MMMM"
-            />
-            <DatePicker
-               selected={_filterValue(DATEPICKER).endDate}
-               onChange={::this.changeEndDate}
-               placeholderText="Конечная дата"
-               isClearable={true}
-               startDate={_filterValue(DATEPICKER).startDate}
-               endDate={_filterValue(DATEPICKER).endDate}
-               showYearDropdown
-               dateFormatCalendar="MMMM"
-            />
-         </div>
-      </div> : null;
-
       let optionsBlock = <div className="filter-options-list">
-         <UserFilter users={users} currentValue={_filterValue(USER_FILTER)} changeFilter={::this.changeFilters} />
-         <PeriodFilter currentValue={_filterValue(PERIOD_FILTER)} changeFilter={::this.changeFilters} />
-         <TypeFilter eventTypes={eventTypes} currentValue={_filterValue(TYPE_FILTER)} changeFilter={::this.changeFilters} />
+         <UserFilter users={users} currentValue={getFilterValue(USER_FILTER, filters)} changeFilter={::this.changeFilters} />
+         <PeriodFilter currentValue={showDateRangeFilter ? periodFilterTypes.SELECTED_DATE : getFilterValue(PERIOD_FILTER, filters)} changeFilter={::this.changeFilters} />
+         <TypeFilter eventTypes={eventTypes} currentValue={getFilterValue(TYPE_FILTER, filters)} changeFilter={::this.changeFilters} />
 
          <ReactCSSTransitionGroup transitionName="filter-datepicker" transitionAppear={true}>
-            {dateRangeBlock}
+            {showDateRangeFilter
+               ? <DateRangeFilter
+                     changeStartDate={::this.changeStartDate}
+                     changeEndDate={::this.changeEndDate}
+                     startDate={_getDateRangeValue()}
+                     endDate={_getDateRangeValue(true)}
+                  />
+               : null}
          </ReactCSSTransitionGroup>
       </div>;
 
@@ -109,10 +90,10 @@ export default class Filter extends React.Component {
          <div className="filter-wrapper">
             <div className="filter-container">
                <div className="icon-button" onClick={::this.toggleDialog}>
-                  {this.props.filters.some(x => x.isFiltered) ? filterDot : null}
+                  {hasActiveFilters ? filterDot : null}
                </div>
                <ReactCSSTransitionGroup transitionName="filter-news" transitionAppear={true}>
-                  { this.state.dialogShowFlag ? optionsBlock : null }
+                  {this.state.dialogShowFlag ? optionsBlock : null}
                </ReactCSSTransitionGroup>
             </div>
          </div>

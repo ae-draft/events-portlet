@@ -1,5 +1,5 @@
 import React from 'react';
-import {VisibilityFilters} from '../../../actions/events-actions';
+import {VisibilityFilters} from '../../../actions/filters-actions';
 let {USER_FILTER} = VisibilityFilters;
 
 export default class UserFilter extends React.Component {

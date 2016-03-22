@@ -1,5 +1,5 @@
 import React from 'react';
-import {VisibilityFilters} from '../../../actions/events-actions';
+import {VisibilityFilters} from '../../../actions/filters-actions';
 let {PERIOD_FILTER} = VisibilityFilters;
 import {periodFilterTypes} from '../../../common/consts/period-filter-types';
 let {TODAY, YESTERDAY, WEEK, MONTH, YEAR, SELECTED_DATE } = periodFilterTypes;

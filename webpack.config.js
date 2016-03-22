@@ -23,14 +23,14 @@ var _devPlugins = [
 ];
 
 var _prodPlugins = [
-   // Avoid publishing files when compilation failed
-   new webpack.NoErrorsPlugin(),
    new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
       'env_API_URL': '"api"'
    }),
    new webpack.optimize.UglifyJsPlugin({
-      minimize: true
+      compress: {
+         warnings: false
+      }
    })
 ];
 
@@ -56,7 +56,7 @@ module.exports = {
       loaders: [{
          test: /\.jsx?$/,
          exclude: /node_modules/,
-         loaders: ["babel?stage=0"]
+         loaders: ["babel-loader"]
       }, {
          test: /\.html$/,
          loader: "file?name=[name].[ext]",

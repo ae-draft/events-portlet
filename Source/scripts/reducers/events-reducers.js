@@ -1,14 +1,18 @@
-import { LOAD_EVENTS } from '../actions/events-actions';
+import { LOAD_EVENTS, LOAD_NEXT } from '../actions/events-actions';
 
 export function events(state = {data: [], _total: 0, _canLoadMore: true}, action) {
    switch (action.type) {
       case LOAD_EVENTS:
-         let eventsCollection = [...state.data, ...action.recievedNews];
-
          return {
-            data: eventsCollection,
+            data: action.recievedNews,
             _total: action.total,
-            _canLoadMore: eventsCollection.length !== action.total
+            _canLoadMore: action.recievedNews.length !== action.total
+         };
+      case LOAD_NEXT:
+         return {
+            data: [...state.data, ...action.recievedNews],
+            _total: action.total,
+            _canLoadMore: action.recievedNews.length !== action.total
          };
       default:
          return state;

@@ -1,13 +1,12 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {loadEvents} from '../../../actions/events-actions';
+import {loadEvents, loadNext} from '../../../actions/events-actions';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import EventItem from '../dumb/event-item.jsx';
 import Filter from '../common/events-filter.jsx';
-import { _filterEvents } from '../utils/filter-func';
 
 let _connect = state => ({
-   events: _filterEvents(state.events.data, state.filters),
+   events: state.events.data,
    _total: state.events._total,
    _canLoadMore: state.events._canLoadMore
 });
@@ -35,8 +34,9 @@ export default class Events extends React.Component {
                </ReactCSSTransitionGroup>
             </div>
             {_canLoadMore
-               ? <div className="load-more fa fa-angle-double-down" onClick={() => dispatch(loadEvents())}></div>
-               : null}
+               ? <div className="load-more fa fa-angle-double-down" onClick={() => dispatch(loadNext())}></div>
+               : null
+            }
          </div>
       );
    }
