@@ -8,6 +8,7 @@ import TypeFilter from '../common/type-filter.jsx';
 import DateRangeFilter from '../common/daterange-filter.jsx';
 
 import {loadEventTypes} from '../../../actions/eventTypes-actions';
+import {loadAuthors} from '../../../actions/authors-actions';
 import {VisibilityFilters, changeFilter} from '../../../actions/filters-actions';
 let {USER_FILTER, PERIOD_FILTER, TYPE_FILTER, DATEPICKER} = VisibilityFilters;
 
@@ -22,7 +23,7 @@ let _connect = state => {
       filters: state.filters.filters,
       hasActiveFilters: state.filters.hasActiveFilters,
       showDateRangeFilter: state.filters.showDateRangeFilter,
-      users: _.chain(state.events.data).map(item => _.get(item, 'User')).uniqBy('Id').value(),
+      authors: state.authors,
       eventTypes: state.eventTypes.filter(filteredEventTypes(uniqUsedPropTypes))
    }
 };
@@ -41,6 +42,7 @@ export default class Filter extends React.Component {
 
    componentDidMount() {
       this.dispatch(loadEventTypes());
+      this.dispatch(loadAuthors());
    }
 
    toggleDialog() {
@@ -60,17 +62,17 @@ export default class Filter extends React.Component {
    }
 
    render() {
-      const {dispatch, eventTypes, users, filters, hasActiveFilters, showDateRangeFilter} = this.props;
+      const {dispatch, eventTypes, authors, filters, hasActiveFilters, showDateRangeFilter} = this.props;
       let _getDateRangeValue = getEndDate => {
          let _value = getFilterValue(DATEPICKER, filters);
          if(!_value) return null;
 
          return getEndDate ? _value.endDate : _value.startDate;
       };
-
+      
       let filterDot = <div className="filtered-dot"></div>;
       let optionsBlock = <div className="filter-options-list">
-         <UserFilter users={users} currentValue={getFilterValue(USER_FILTER, filters)} changeFilter={::this.changeFilters} />
+         <UserFilter users={authors} currentValue={getFilterValue(USER_FILTER, filters)} changeFilter={::this.changeFilters} />
          <PeriodFilter currentValue={showDateRangeFilter ? periodFilterTypes.SELECTED_DATE : getFilterValue(PERIOD_FILTER, filters)} changeFilter={::this.changeFilters} />
          <TypeFilter eventTypes={eventTypes} currentValue={getFilterValue(TYPE_FILTER, filters)} changeFilter={::this.changeFilters} />
 

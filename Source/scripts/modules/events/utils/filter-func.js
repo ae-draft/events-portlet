@@ -8,12 +8,13 @@ export function getFilterValue(type, filters) {
 }
 
 export function getDateRange(filters) {
+   const formatDate = date => date.format("YYYY-MM-DD");
    let dateRange = getFilterValue(VisibilityFilters.DATEPICKER, filters);
 
    if(!_.isEmpty(dateRange))
       return {
-         startDate: dateRange.startDate ? dateRange.startDate.format("YYYY-MM-DD") : null,
-         endDate: dateRange.endDate ? dateRange.endDate.format("YYYY-MM-DD") : null
+         startDate: dateRange.startDate ? formatDate(dateRange.startDate) : null,
+         endDate: dateRange.endDate ? formatDate(dateRange.endDate) : null
       };
 
    let period = getFilterValue(VisibilityFilters.PERIOD_FILTER, filters);
@@ -22,29 +23,29 @@ export function getDateRange(filters) {
    switch (period) {
       case TODAY:
          return {
-            startDate: moment().startOf('day').format("YYYY-MM-DD"),
+            startDate: formatDate(moment().startOf('day')),
             endDate: null
          };
       case YESTERDAY:
          let yesterday = moment().add(-1, 'days');
          return {
-            startDate: yesterday.startOf('day').format("YYYY-MM-DD"),
-            endDate: now.startOf('day').format("YYYY-MM-DD")
+            startDate: formatDate(yesterday.startOf('day')),
+            endDate: formatDate(now.startOf('day'))
          };
       case WEEK:
          return {
-            startDate: now.startOf('week').format("YYYY-MM-DD"), 
-            endDate: now.endOf('week').format("YYYY-MM-DD")
+            startDate: formatDate(now.startOf('week')),
+            endDate: formatDate(now.endOf('week'))
          };
       case MONTH:
          return {
-            startDate: now.startOf('month').format("YYYY-MM-DD"),
-            endDate: now.endOf('month').format("YYYY-MM-DD")
+            startDate: formatDate(now.startOf('month')),
+            endDate: formatDate(now.endOf('month'))
          };
       case YEAR:
          return {
-            startDate: now.startOf('year').format("YYYY-MM-DD"),
-            endDate: now.endOf('year').format("YYYY-MM-DD")
+            startDate: formatDate(now.startOf('year')),
+            endDate: formatDate(now.endOf('year'))
          };
       default:
          return {startDate: null, endDate: null};

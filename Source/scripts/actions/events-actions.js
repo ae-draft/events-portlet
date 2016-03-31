@@ -5,6 +5,7 @@ const {PERIOD_FILTER, USER_FILTER, TYPE_FILTER, DATEPICKER} = VisibilityFilters;
 import {getFilterValue, getDateRange} from '../modules/events/utils/filter-func'
 
 export const LOAD_EVENTS = 'LOAD_EVENTS';
+export const REQUEST_EVENTS = 'REQUEST_EVENTS';
 export const LOAD_NEXT = 'LOAD_NEXT';
 
 function buildComplexFilter(filters) {
@@ -27,10 +28,17 @@ function getRequestOptions(state) {
    return {pageNumber, pageSize: EVENTS_PAGE_SIZE, filter};
 }
 
+function requestEvents() {
+   return {
+      type: REQUEST_EVENTS
+   };
+}
+
 export function fetchEvents(action, pageNumber = 1) {
    return (dispatch, getState) => {
+      dispatch(requestEvents());
       interaction.send('/events', {...getRequestOptions(getState()), pageNumber}, {}, dispatch).done(req => {
-         dispatch({type: action, recievedNews: req.Data, total: req.Count});
+         dispatch({type: action, recievedEvents: req.Data, total: req.Count});
       });
    };
 }

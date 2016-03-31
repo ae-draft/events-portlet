@@ -24,28 +24,34 @@ export function delVisibilityFilter(filter) {
    return { type: DEL_VISIBILITY_FILTER, filter };
 }
 
-export function toggleDateRangeFilter() {
-   return { type: TOGGLE_DATERANGE_FILTER };
+export function toggleDateRangeFilter(activity = false) {
+   return { type: TOGGLE_DATERANGE_FILTER, activity };
+}
+
+function changePeriodFilter(filter, param) {
+   return (dispatch, getState) => {
+      if(param === SELECTED_DATE) {
+         dispatch(toggleDateRangeFilter(true));
+      }
+      else if(_.isEmpty(param)) {
+            dispatch(delVisibilityFilter(filter));
+            dispatch(toggleDateRangeFilter(false));
+         } else {
+            if(_.result(getState(), 'filters.showDateRangeFilter')) dispatch(toggleDateRangeFilter(false));
+            dispatch(setVisibilityFilter(filter, param));
+         }
+   };
 }
 
 export function changeFilter(filter, param) {
    let needLoadEvents = false;
    return (dispatch, getState) => {
-      if(param === SELECTED_DATE)
-         dispatch(toggleDateRangeFilter());
-      else {
-         if(_.isEmpty(param)) {
-            dispatch(delVisibilityFilter(filter));
-            if(filter === VisibilityFilters.PERIOD_FILTER) {
-               dispatch(toggleDateRangeFilter());
-            }
-         } else {
-            if(filter === VisibilityFilters.PERIOD_FILTER && _.result(getState(), 'filters.showDateRangeFilter'))
-               dispatch(toggleDateRangeFilter());
-
-            dispatch(setVisibilityFilter(filter, param));
-         }
-
+      if(filter === VisibilityFilters.PERIOD_FILTER) {
+         dispatch(changePeriodFilter(filter, param));
+         if(param !== SELECTED_DATE) needLoadEvents = true;
+      } else {
+         if(_.isEmpty(param)) dispatch(delVisibilityFilter(filter));
+         else dispatch(setVisibilityFilter(filter, param));
          needLoadEvents = true;
       }
 

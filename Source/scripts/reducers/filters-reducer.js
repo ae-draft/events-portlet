@@ -16,7 +16,7 @@ export function filters(state = _initialState, action) {
 
    switch (action.type) {
       case TOGGLE_DATERANGE_FILTER:
-         return {...state, showDateRangeFilter: !state.showDateRangeFilter};
+         return {...state, showDateRangeFilter: action.activity};
 
       case SET_DATEPICKER_FILTER:
          _oldFilter = _getOldFilter(action.filter);
